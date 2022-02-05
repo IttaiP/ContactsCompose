@@ -1,6 +1,9 @@
 package com.example.contactscompose
 
+import java.io.Serializable
+
 data class Contact(
+    val id: String,
     val firstName: String?,
     val lastName: String?,
     val image: String?,
@@ -8,4 +11,4 @@ data class Contact(
     val homeEmail: String?,
     val homePhone: String?,
     val mobilePhone: String?,
-    val workPhone: String?)
+    val workPhone: String?): Serializable

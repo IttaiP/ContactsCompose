@@ -12,6 +12,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
+import java.util.*
+import kotlin.collections.ArrayList
 
 class ContactsRepository {
 
@@ -61,6 +63,7 @@ class ContactsRepository {
                         var workEmail: String? = ""
                         var familyName: String? = ""
                         var firstName: String? = ""
+                        var id:String = UUID.randomUUID().toString()
                         if (dataCursor.moveToFirst()) {
                             // Getting Display Name
                             do {
@@ -203,7 +206,7 @@ class ContactsRepository {
                             if (firstName != null && firstName != "") details += "firstName : $firstName\n"
 
 
-                            val contact = Contact(firstName, familyName, photoPath, workEmail, homeEmail, homePhone, mobilePhone, workPhone)
+                            val contact = Contact(id, firstName, familyName, photoPath, workEmail, homeEmail, homePhone, mobilePhone, workPhone)
 
                             contacts?.add(contact)
 
