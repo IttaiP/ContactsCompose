@@ -16,7 +16,10 @@ import androidx.lifecycle.Observer
 import com.example.contactscompose.ui.theme.ContactsComposeTheme
 
 import android.graphics.BitmapFactory
+import android.os.PersistableBundle
+import android.view.animation.OvershootInterpolator
 import android.widget.SearchView
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,38 +51,55 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kotlinx.coroutines.delay
 import java.util.*
 import kotlin.collections.ArrayList
 
 
 class MainActivity : ComponentActivity() {
+    lateinit var contactsLiveData: LiveData<ArrayList<Contact>>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+
         val viewModel: ContactsViewModel by viewModels()
 
         requestPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
         requestPermissionLauncher.launch(Manifest.permission.WRITE_CONTACTS)
 
+        if(savedInstanceState!= null){
+            setContent {
+                Navigation(contacts = savedInstanceState.getSerializable("contacts") as ArrayList<Contact>)
+            }
+        }
+        else{
+            setContent {
+                LoadingScreen()
+            }
+        }
         viewModel.runGetContacts(application)
-        viewModel.getContacts().observe(this, Observer<ArrayList<Contact>> { contacts ->
+        contactsLiveData = viewModel.getContacts()
+        contactsLiveData.observe(this, Observer<ArrayList<Contact>> { contacts ->
             setContent {
                 Navigation(contacts = contacts)
             }
         }
         )
 
-        setContent {
-            Text(text = "loading")
-        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        super.onSaveInstanceState(outState, outPersistentState)
+        outState.putSerializable("contacts", contactsLiveData.value)
     }
 
     // Register the permissions callback, which handles the user's response to the
@@ -101,6 +121,27 @@ class MainActivity : ComponentActivity() {
         })
 }
 
+
+@Preview
+@Composable
+fun LoadingScreen(){
+
+
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Loading..",
+            fontSize = 30.sp
+
+        )
+    }
+}
+
+
+
 @Composable
 fun MainScreen(contacts: ArrayList<Contact>, navController: NavController){
     val textState = remember { mutableStateOf(TextFieldValue("")) }
@@ -109,32 +150,6 @@ fun MainScreen(contacts: ArrayList<Contact>, navController: NavController){
         ContactsList(contacts = contacts, navController, state= textState)
     }
 }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    val dummyData: ArrayList<Contact> = ArrayList()
-//    dummyData.add(Contact("aa", "bbb", null, "ccc", "ddd", "eee", "fff", "ggg"))
-//    dummyData.add(Contact("bbaaaa", "bbb", null, "ccc", "ddd", "eee", "fff", "ggg"))
-//
-//    ContactsList(contacts = dummyData)
-//}
-
-//@Preview(showBackground = true)
-//@Composable
-//fun Demo() {
-//    val contactList = ArrayList<Contact>()
-//    contactList.add(Contact("122344","aa", "bbb", null, "ccc", "ddd", "eee", "fff", "ggg"))
-//    contactList.add(Contact("1234324553","bbaaaa", "bbb", null, "ccc", "ddd", "eee", "fff", "ggg"))
-//    ContactsList(contacts = contactList)
-
-//    ContactCard(
-//        contact = Contact(
-//            "avi", "xahavi", null, "ccc",
-//            "ddd", "eee", "fff", "ggg"
-//        )
-//    )
 
 @Composable
 fun Navigation(contacts: ArrayList<Contact>){
@@ -201,13 +216,6 @@ fun SearchView(state: MutableState<TextFieldValue>) {
             disabledIndicatorColor = androidx.compose.ui.graphics.Color.Transparent
         )
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SearchViewPreview() {
-    val textState = remember { mutableStateOf(TextFieldValue("")) }
-    SearchView(textState)
 }
 
 @Composable
@@ -290,7 +298,7 @@ fun ContactImage(path: String?, letter: Char) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(androidx.compose.ui.graphics.Color.Blue)
+                    .background(androidx.compose.ui.graphics.Color.Cyan)
             ) {
                 Text(
                     text = letter.toString(),

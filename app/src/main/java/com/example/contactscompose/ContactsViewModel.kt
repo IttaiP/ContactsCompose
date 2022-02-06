@@ -14,7 +14,7 @@ class ContactsViewModel (
 
     fun runGetContacts(application: Application){
         viewModelScope.launch {
-            val result = contactsRepository.getContacts(application)
+            contactsRepository.getContacts(application)
         }
     }
 

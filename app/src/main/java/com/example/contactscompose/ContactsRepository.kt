@@ -209,19 +209,13 @@ class ContactsRepository {
                             val contact = Contact(id, firstName, familyName, photoPath, workEmail, homeEmail, homePhone, mobilePhone, workPhone)
 
                             contacts?.add(contact)
+                            contactsLiveData.postValue(contacts)
+
 
                         }
                     } while (contactsCursor.moveToNext())
                 }
-                contactsLiveData.postValue(contacts)
             }
         }
     }
-
-//
-//        override fun onPostExecute(result: Cursor) {
-//            // Setting the cursor containing contacts to listview
-//            mAdapter.swapCursor(result)
-//        }
-
 }
